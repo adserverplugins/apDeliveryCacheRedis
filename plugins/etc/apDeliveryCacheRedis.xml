@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xml-stylesheet type="text/xsl" href=""?>
+
+<plugin>
+    <name>apDeliveryCacheRedis</name>
+    <creationDate>2013-03-20</creationDate>
+    <author>AdserverPlugins.com</author>
+    <authorEmail>info@adserverplugins.com</authorEmail>
+    <authorUrl>http://www.adserverplugins.com/</authorUrl>
+    <license>GPLv2</license>
+    <description>AdserverPlugins.com Redis Delivery Cache Store Plugins</description>
+    <version>1.0.1</version>
+    <type>package</type>
+
+    <install>
+
+        <contents>
+            <group name="apRedis">1</group>
+        </contents>
+
+        <register>
+            <extension type='deliveryCacheStore' group='apRedis'>apRedis</extension>
+        </register>
+
+    </install>
+
+</plugin>
