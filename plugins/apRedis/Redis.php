@@ -1,17 +1,21 @@
 <?php
 
 /**
- * apDeliveryCacheRedis for the OpenX ad server
+ * apDeliveryCacheRedis for Revive Adserver and OpenX Source
  *
  * @author Matteo Beccati
  * @license GPLv2
- * @copyright 2011-2013 AdserverPlugins.com - All rights reserved
+ * @copyright 2011-2014 AdserverPlugins.com - All rights reserved
  *
  */
 
 
 class AP_Redis
 {
+    const TYPE_EXT = 0;
+    const TYPE_PHP = 1;
+
+    protected $type;
     protected $redis;
     protected $igbinary;
 
@@ -22,12 +26,14 @@ class AP_Redis
         }
 
         $this->igbinary = !empty($aConf['igbinary']) && extension_loaded('igbinary');
-        
+
         if (extension_loaded('redis')) {
+            $this->type = self::TYPE_EXT;
             $this->redis = new Redis;
             $method = empty($aConf['persistent']) ? 'connect' : 'pconnect';
             $this->redis->$method($aConf['host'], $aConf['port'], $aConf['timeout']);
         } else {
+            $this->type = self::TYPE_PHP;
             if (!class_exists('Redis')) {
                 include MAX_PATH.'/plugins/apRedis/Redisent/Redis.php';
             }
@@ -58,5 +64,10 @@ class AP_Redis
         }
 
         return unserialize($data);
+    }
+
+    public function getType()
+    {
+        return $this->type;
     }
 }

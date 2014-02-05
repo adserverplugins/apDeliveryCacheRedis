@@ -1,12 +1,12 @@
 <?php
 
 /**
- * apDeliveryCacheRedis for the OpenX ad server
+ * apDeliveryCacheRedis for Revive Adserver and OpenX Source
  *
  * @author Matteo Beccati
  * @license GPLv2
- * @copyright 2011-2013 AdserverPlugins.com - All rights reserved
- * 
+ * @copyright 2011-2014 AdserverPlugins.com - All rights reserved
+ *
  */
 
 
