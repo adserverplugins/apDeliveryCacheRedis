@@ -3,13 +3,14 @@
 
 <plugin>
     <name>apDeliveryCacheRedis</name>
-    <creationDate>2014-02-04</creationDate>
+    <displayName>AdserverPlugins.com Redis Delivery Cache</displayName>
+    <creationDate>2014-04-30</creationDate>
     <author>AdserverPlugins.com</author>
     <authorEmail>info@adserverplugins.com</authorEmail>
     <authorUrl>http://www.adserverplugins.com/</authorUrl>
     <license>GPLv2</license>
-    <description>AdserverPlugins.com Redis Delivery Cache Store Plugins</description>
-    <version>1.1.0</version>
+    <description>Redis Delivery Cache Store Plugin</description>
+    <version>1.2.0</version>
     <type>package</type>
 
     <install>

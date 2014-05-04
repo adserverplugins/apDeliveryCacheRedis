@@ -25,6 +25,14 @@ class RedisException extends Exception
  */
 class Redis
 {
+    /**
+     * The commands that need a PHP array (hash) as response
+     * @var array
+     */
+    static private $arrayresponse = array(
+        'HGETALL' => true,
+        'HSCAN' => true,
+    );
 
     /**
      * Socket connection to the Redis server
@@ -107,7 +115,8 @@ class Redis
     public function uncork()
     {
         /* Open a Redis connection and execute the queued commands */
-        foreach ($this->queue as $command) {
+        foreach ($this->queue as $q) {
+            $command = $q[0];
             for ($written = 0; $written < strlen($command); $written += $fwrite) {
                 $fwrite = fwrite($this->__sock, substr($command, $written));
                 if ($fwrite === false || $fwrite <= 0) {
@@ -119,7 +128,7 @@ class Redis
         // Read in the results from the pipelined commands
         $responses = array();
         for ($i = 0; $i < count($this->queue); $i++) {
-            $responses[] = $this->readResponse();
+            $responses[] = $this->readResponse($this->queue[$i][1]);
         }
 
         // Clear the queue and return the response
@@ -149,12 +158,13 @@ class Redis
         }
 
         /* Build the Redis unified protocol command */
-        array_unshift($args, strtoupper($name));
+        $name = strtoupper($name);
+        array_unshift($args, $name);
         $command = sprintf('*%d%s%s%s', count($args), "\r\n", implode(array_map(
                     array($this, '_writeStr'), $args), "\r\n"), "\r\n");
 
         /* Add it to the pipeline queue */
-        $this->queue[] = $command;
+        $this->queue[] = array($command, isset(self::$arrayresponse[$name]));
 
         if ($this->pipelined) {
             return $this;
@@ -168,7 +178,7 @@ class Redis
         return sprintf('$%d%s%s', strlen($str), "\r\n", $str);
     }
 
-    private function readResponse()
+    private function readResponse($array = false)
     {
         /* Parse the response based on the reply identifier */
         $reply = trim(fgets($this->__sock, 512));
@@ -214,7 +224,13 @@ class Redis
                 }
                 $response = array();
                 for ($i = 0; $i < $count; $i++) {
-                    $response[] = $this->readResponse();
+                    if ($array && $i + 1 < $count) {
+                        $key = $this->readResponse();
+                        $response[$key] = $this->readResponse();
+                        $i++;
+                    } else {
+                        $response[] = $this->readResponse();
+                    }
                 }
                 break;
             /* Integer reply */
