@@ -64,14 +64,22 @@ class Redis
     /**
      * Creates a Redisent connection to the Redis server at the address specified by {@link $dsn}.
      * The default connection is to the server running on localhost on port 6379.
-     * @param string $dsn The data source name of the Redis server
+     * @param string $host The hostanme (or unix socket)
+     * @param string $port The port number (ignored for unix socket)
      * @param float $timeout The connection timeout in seconds
      */
-    function __construct($dsn = 'redis://localhost:6379', $timeout = null)
+    function __construct($host, $port = null, $timeout = null)
     {
-        $this->dsn = parse_url($dsn);
-        $host = isset($this->dsn['host']) ? $this->dsn['host'] : 'localhost';
-        $port = isset($this->dsn['port']) ? $this->dsn['port'] : 6379;
+        if (empty($host)) {
+            throw new RedisException("Invalid hostname");
+        }
+        if ($host[0] == '/') {
+            // Socket
+            $host = 'unix://'.$host;
+            $port = -1;
+        } elseif (empty($port)) {
+            $port = 6379;
+        }
         $timeout = $timeout ? : ini_get("default_socket_timeout");
         $this->__sock = @fsockopen($host, $port, $errno, $errstr, $timeout);
         if ($this->__sock === false) {

@@ -3,13 +3,13 @@
 
 <plugin>
     <name>apRedis</name>
-    <creationDate>2014-05-22</creationDate>
+    <creationDate>2015-02-17</creationDate>
     <author>Matteo Beccati</author>
     <authorEmail>matteo@beccati.com</authorEmail>
     <authorUrl>http://www.beccati.com/</authorUrl>
     <license>GPLv2</license>
     <description>Redis based Cache Store plugins for OpenX</description>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
     <oxversion>2.8.0</oxversion>
     <extends>deliveryCacheStore</extends>
 
@@ -33,6 +33,7 @@
         <configuration option="Redis">
             <setting key="host" type="text" label="Redis host" required="1" size="32" visible="1">127.0.0.1</setting>
             <setting key="port" type="text" label="Redis port" required="1" size="32" visible="1">6379</setting>
+            <setting key="socket" type="text" label="Redis socket path" required="1" size="64" visible="1"></setting>
             <setting key="database" type="text" label="Redis database number" required="1" size="32" visible="1">1</setting>
             <setting key="timeout" type="text" label="Redis timeout" required="1" size="32" visible="1">10</setting>
             <setting key="persistent" type="checkbox" label="Use Redis persistent connections" visible="1">0</setting>

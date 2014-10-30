@@ -27,17 +27,25 @@ class AP_Redis
 
         $this->igbinary = !empty($aConf['igbinary']) && extension_loaded('igbinary');
 
+        if (!empty($aConf['socket'])) {
+            $host = $aConf['socket'];
+            $port = null;
+        } else {
+            $host = $aConf['host'];
+            $port = $aConf['port'];
+        }
+
         if (extension_loaded('redis')) {
             $this->type = self::TYPE_EXT;
             $this->redis = new Redis;
             $method = empty($aConf['persistent']) ? 'connect' : 'pconnect';
-            $this->redis->$method($aConf['host'], $aConf['port'], $aConf['timeout']);
+            $this->redis->$method($host, $port, $aConf['timeout']);
         } else {
             $this->type = self::TYPE_PHP;
             if (!class_exists('Redis')) {
                 include MAX_PATH.'/plugins/apRedis/Redisent/Redis.php';
             }
-            $this->redis = new Redis("redis://{$aConf['host']}:{$aConf['port']}", $aConf['timeout']);
+            $this->redis = new Redis($host, $port, $aConf['timeout']);
         }
         if (!empty($aConf['database'])) {
             $this->redis->select($aConf['database']);
