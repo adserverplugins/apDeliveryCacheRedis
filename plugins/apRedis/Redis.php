@@ -47,7 +47,8 @@ class AP_Redis
             }
             $this->redis = new Redis($host, $port, $aConf['timeout']);
         }
-        if (!empty($aConf['database'])) {
+
+        if (!empty($aConf['database']) || !empty($aConf['persistent'])) {
             $this->redis->select($aConf['database']);
         }
     }
