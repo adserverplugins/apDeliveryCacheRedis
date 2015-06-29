@@ -19,7 +19,7 @@ class AP_Redis_Cache extends AP_Redis
 {
     static $instance;
 
-    static function singleton()
+    public static function singleton()
     {
         if (!isset(self::$instance)) {
             self::$instance = new AP_Redis_Cache;
@@ -34,6 +34,7 @@ function Plugin_deliveryCacheStore_apRedis_apRedis_Delivery_cacheRetrieve($filen
 {
     $expiryTime = $GLOBALS['OA_Delivery_Cache']['expiry'];
     $now = MAX_commonGetTimeNow();
+
     try {
         $redis = AP_Redis_Cache::singleton();
 
@@ -76,12 +77,12 @@ function Plugin_deliveryCacheStore_apRedis_apRedis_Delivery_cacheStore($filename
         $redis = AP_Redis_Cache::singleton();
 
         if (isset($cache_contents['cache_expire'])) {
-            $expire = $cache_contents['cache_expire'];
+            $expiryTime = $cache_contents['cache_expire'];
         } elseif (isset($cache_contents['cache_time'])) {
-            $expire = $cache_contents['cache_time'] - MAX_commonGetTimeNow() + $GLOBALS['OA_Delivery_Cache']['expiry'];
+            $expiryTime = $cache_contents['cache_time'] - MAX_commonGetTimeNow() + $GLOBALS['OA_Delivery_Cache']['expiry'];
         }
 
-        $result = $redis->setex($filename, $expire + 86400, $redis->serialize($cache_contents));
+        $result = $redis->setex($filename, $expiryTime + 86400, $redis->serialize($cache_contents));
         $redis->del('_lock_'.$filename);
 
         return $result;

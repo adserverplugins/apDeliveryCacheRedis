@@ -17,15 +17,15 @@ require_once dirname(__FILE__) . '/apRedis.delivery.php';
 
 class Plugins_DeliveryCacheStore_apRedis_apRedis extends Plugins_DeliveryCacheStore
 {
-    function getName()
+    public function getName()
     {
         return 'Redis';
     }
 
-    function getStatus()
+    public function getStatus()
     {
         try {
-            $redis = AP_Redis_Cache::singleton();
+            AP_Redis_Cache::singleton();
         } catch (Exception $e) {
             return false;
         }
@@ -33,14 +33,14 @@ class Plugins_DeliveryCacheStore_apRedis_apRedis extends Plugins_DeliveryCacheSt
         return true;
     }
 
-    function _deleteCacheFile($filename)
+    public function _deleteCacheFile($filename)
     {
         $redis = AP_Redis_Cache::singleton();
 
         return $redis->del($filename);
     }
 
-    function _deleteAll()
+    public function _deleteAll()
     {
         $redis = AP_Redis_Cache::singleton();
 
