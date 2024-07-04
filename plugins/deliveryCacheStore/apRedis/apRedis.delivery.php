@@ -1,28 +1,28 @@
 <?php
 
 /**
- * apDeliveryCacheRedis for Revive Adserver and OpenX Source
+ * apDeliveryCacheRedis for Revive Adserver
  *
  * @author Matteo Beccati
  * @license GPLv2
- * @copyright 2011-2013 AdserverPlugins.com - All rights reserved
+ * @copyright AdserverPlugins.com - All rights reserved
  *
  */
 
 
 if (!class_exists('AP_Redis')) {
-    require_once MAX_PATH.'/plugins/apRedis/Redis.php';
+    require_once MAX_PATH . '/plugins/apRedis/Redis.php';
 }
 
 
 class AP_Redis_Cache extends AP_Redis
 {
-    static $instance;
+    private static $instance;
 
-    public static function singleton()
+    public static function singleton(): self
     {
         if (!isset(self::$instance)) {
-            self::$instance = new AP_Redis_Cache;
+            self::$instance = new self();
         }
 
         return self::$instance;
@@ -45,7 +45,7 @@ function Plugin_deliveryCacheStore_apRedis_apRedis_Delivery_cacheRetrieve($filen
              || (isset($data['cache_expire']) && $data['cache_expire'] < $now)) {
                 // The cache entry is expired, try to acquire a lock by setting
                 // a lock variable, if not already set
-                $lock = '_lock_'.$filename;
+                $lock = '_lock_' . $filename;
                 if ($redis->setnx($lock, 1)) {
                     // Failsafe, make sure that the lock expires after a few
                     // seconds to avoid a cache entry being permanently locked
@@ -83,7 +83,7 @@ function Plugin_deliveryCacheStore_apRedis_apRedis_Delivery_cacheStore($filename
         }
 
         $result = $redis->setex($filename, $expiryTime + 86400, $redis->serialize($cache_contents));
-        $redis->del('_lock_'.$filename);
+        $redis->del('_lock_' . $filename);
 
         return $result;
     } catch (Exception $e) {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * apDeliveryCacheRedis for Revive Adserver and OpenX Source
+ * apDeliveryCacheRedis for Revive Adserver
  *
  * This file includes a derivative version of:
  *
@@ -17,7 +17,6 @@
  */
 class RedisException extends Exception
 {
-
 }
 
 /**
@@ -25,7 +24,6 @@ class RedisException extends Exception
  */
 class Redis
 {
-
     /**
      * Socket connection to the Redis server
      * @var resource
@@ -59,7 +57,7 @@ class Redis
      * @var array
      * @access private
      */
-    private $queue = array();
+    private $queue = [];
 
     /**
      * Creates a Redisent connection to the Redis server at the address specified by {@link $dsn}.
@@ -68,19 +66,19 @@ class Redis
      * @param string $port The port number (ignored for unix socket)
      * @param float $timeout The connection timeout in seconds
      */
-    function __construct($host, $port = null, $timeout = null)
+    public function __construct($host, $port = null, $timeout = null)
     {
         if (empty($host)) {
             throw new RedisException("Invalid hostname");
         }
         if ($host[0] == '/') {
             // Socket
-            $host = 'unix://'.$host;
+            $host = 'unix://' . $host;
             $port = -1;
         } elseif (empty($port)) {
             $port = 6379;
         }
-        $timeout = $timeout ? : ini_get("default_socket_timeout");
+        $timeout = $timeout ?: ini_get("default_socket_timeout");
         $this->__sock = @fsockopen($host, $port, $errno, $errstr, $timeout);
         if ($this->__sock === false) {
             throw new RedisException("{$errno} - {$errstr}");
@@ -90,7 +88,7 @@ class Redis
         }
     }
 
-    function __destruct()
+    public function __destruct()
     {
         fclose($this->__sock);
     }
@@ -101,7 +99,7 @@ class Redis
      * @see uncork
      * @access public
      */
-    function pipeline()
+    public function pipeline()
     {
         $this->pipelined = true;
         return $this;
@@ -125,13 +123,13 @@ class Redis
         }
 
         // Read in the results from the pipelined commands
-        $responses = array();
+        $responses = [];
         for ($i = 0; $i < count($this->queue); $i++) {
             $responses[] = $this->readResponse();
         }
 
         // Clear the queue and return the response
-        $this->queue = array();
+        $this->queue = [];
         if ($this->pipelined) {
             $this->pipelined = false;
             if ($this->transaction) {
@@ -149,17 +147,18 @@ class Redis
         return $this->_call($name, $args);
     }
 
-    private function _call($name, $args = array())
+    private function _call($name, $args = [])
     {
-
         if (!is_array($args)) {
-            $args = array();
+            $args = [];
         }
 
         /* Build the Redis unified protocol command */
         array_unshift($args, strtoupper($name));
-        $command = sprintf('*%d%s%s%s', count($args), "\r\n", implode(array_map(
-                    array($this, '_writeStr'), $args), "\r\n"), "\r\n");
+        $command = sprintf('*%d%s%s%s', count($args), "\r\n", implode("\r\n", array_map(
+            [$this, '_writeStr'],
+            $args
+        )), "\r\n");
 
         /* Add it to the pipeline queue */
         $this->queue[] = $command;
@@ -171,7 +170,7 @@ class Redis
         }
     }
 
-    function _writeStr($str)
+    public function _writeStr($str)
     {
         return sprintf('$%d%s%s', strlen($str), "\r\n", $str);
     }
@@ -220,7 +219,7 @@ class Redis
                 if ($count == '-1') {
                     return null;
                 }
-                $response = array();
+                $response = [];
                 for ($i = 0; $i < $count; $i++) {
                     $response[] = $this->readResponse();
                 }
@@ -262,5 +261,4 @@ class Redis
     {
         return $this->_call('exec')->uncork();
     }
-
 }

@@ -1,19 +1,19 @@
 <?php
 
 /**
- * apDeliveryCacheRedis for Revive Adserver and OpenX Source
+ * apDeliveryCacheRedis for Revive Adserver
  *
  * @author Matteo Beccati
  * @license GPLv2
- * @copyright 2011-2014 AdserverPlugins.com - All rights reserved
+ * @copyright AdserverPlugins.com - All rights reserved
  *
  */
 
 
 class AP_Redis
 {
-    const TYPE_EXT = 0;
-    const TYPE_PHP = 1;
+    public const TYPE_EXT = 0;
+    public const TYPE_PHP = 1;
 
     protected $type;
     protected $redis;
@@ -37,13 +37,13 @@ class AP_Redis
 
         if (extension_loaded('redis')) {
             $this->type = self::TYPE_EXT;
-            $this->redis = new Redis;
+            $this->redis = new Redis();
             $method = empty($aConf['persistent']) ? 'connect' : 'pconnect';
             $this->redis->$method($host, $port, $aConf['timeout']);
         } else {
             $this->type = self::TYPE_PHP;
             if (!class_exists('Redis')) {
-                include MAX_PATH.'/plugins/apRedis/Redisent/Redis.php';
+                include MAX_PATH . '/plugins/apRedis/Redisent/Redis.php';
             }
             $this->redis = new Redis($host, $port, $aConf['timeout']);
         }
@@ -53,8 +53,9 @@ class AP_Redis
         }
     }
 
-    public function __call($name, $arguments) {
-        return call_user_func_array(array($this->redis, $name), $arguments);
+    public function __call($name, $arguments)
+    {
+        return call_user_func_array([$this->redis, $name], $arguments);
     }
 
     public function serialize($data)
