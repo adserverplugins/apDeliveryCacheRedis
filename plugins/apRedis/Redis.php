@@ -43,7 +43,7 @@ class AP_Redis
         } else {
             $this->type = self::TYPE_PHP;
             if (!class_exists('Redis')) {
-                include MAX_PATH . '/plugins/apRedis/Redisent/Redis.php';
+                include __DIR__ . '/Redisent/Redis.php';
             }
             $this->redis = new Redis($host, $port, $aConf['timeout']);
         }

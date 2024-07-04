@@ -1,0 +1,188 @@
+name: Test Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      revive-branch:
+        required: true
+        default: master
+        type: string
+  push: ~
+  schedule:
+    - cron: '30 10 * * 1,3,5'
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  run-tests:
+    name: Run tests
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.1"
+          - "8.2"
+          - "8.3"
+
+        redis-ext:
+          - redis-ext
+          - no-redis-ext
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: "redis:7.2"
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      PHP_EXTENSIONS: none, ctype, curl, dom, fileinfo, intl, json, libxml, mbstring, openssl, pgsql, simplexml, tokenizer, xml, xmlwriter, zip, ${{ ( matrix.redis-ext == 'redis-ext' ) && 'redis' || '' }}
+      PHP_INI_VALUES: memory_limit=-1, assert.exception=1, zend.assertions=1, error_reporting=-1, log_errors_max_len=0, display_errors=On
+
+    steps:
+      - name: Checkout Revive Adserver
+        uses: actions/checkout@v4
+        with:
+          repository: revive-adserver/revive-adserver
+          ref: ${{ inputs.revive-branch }}
+
+      - name: Remove Revive tests
+        run: |
+          find . -type d -and -name unit | xargs rm -Rf
+          find . -type d -and -name integration | xargs rm -Rf
+
+      - name: Checkout Plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugins_dev/apDeliveryCacheRedis
+
+      - name: Checkout apLoader
+        uses: actions/checkout@v4
+        with:
+          repository: adserverplugins/apLoader
+          path: plugins_dev/apLoader
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Install ant 1.7
+        run: |
+          curl -s -O http://archive.debian.org/debian-archive/debian/pool/main/a/ant1.7/ant1.7_1.7.1-7_all.deb
+          curl -s -O http://archive.debian.org/debian-archive/debian/pool/main/a/ant1.7/ant1.7-optional_1.7.1-7_all.deb
+          sudo apt-get -y -qq remove ant
+          sudo apt-get -y -qq install libxerces2-java
+          sudo dpkg -i ant1.7_1.7.1-7_all.deb
+          sudo dpkg -i ant1.7-optional_1.7.1-7_all.deb
+          rm *.deb
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          ini-values: ${{ env.PHP_INI_VALUES }}
+          tools: composer
+
+      - name: Install dependencies with Composer
+        run: composer install --no-interaction --no-ansi --no-progress
+
+      - name: Build plugins
+        run: |
+          PLUGINS=$(cd plugins_dev && find * -maxdepth 0 -and -type d)
+          cd plugins_repo
+          mv ../plugins_dev/* ./
+          for p in $PLUGINS; do
+            ant release -Dname=$p
+          done
+
+      - name: Generate configuration file
+        run: |
+          cat >> etc/test.conf.php <<EOF
+          [apRedis]
+          host=127.0.0.1
+          port=6379
+          socket=
+          database=1
+          timeout=10
+          persistent=
+          igbinary=
+          EOF
+          cat > devel.xml <<EOF
+          <tests>
+          <php>
+          <version name="php" executable="php"/>
+          </php>
+          <database>
+          <version name="pgsql" db.type="pgsql" db.host="127.0.0.1" db.port="5432" db.username="postgres" db.password="secret" db.name="test_revive" db.table.type=""/>
+          </database>
+          <audit>
+          <settings enabled="0"/>
+          </audit>
+          </tests>
+          EOF
+
+      - name: Run tests
+        run: ant test-all
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always() # always run even if the previous step fails
+        with:
+          name: test-results-${{ matrix.php-version }}-${{ matrix.redis-ext }}
+          path: '**/build/test-*'
+          retention-days: 1
+
+  report:
+    name: Collect results
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - run-tests
+
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Test Report
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          run_id: ${{ github.run_id }}
+          name: test-results-.*
+          name_is_regexp: true
+          if_no_artifact_found: warn
+
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test suite results
+          path: '**/build/test-reports/*.xml'
+          reporter: java-junit
+          only-summary: true
