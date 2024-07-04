@@ -15,9 +15,7 @@
 /**
  * Wraps native Redis errors in friendlier PHP exceptions
  */
-class RedisException extends Exception
-{
-}
+class RedisException extends Exception {}
 
 /**
  * Redisent, a Redis interface for the modest among us
@@ -157,7 +155,7 @@ class Redis
         array_unshift($args, strtoupper($name));
         $command = sprintf('*%d%s%s%s', count($args), "\r\n", implode("\r\n", array_map(
             [$this, '_writeStr'],
-            $args
+            $args,
         )), "\r\n");
 
         /* Add it to the pipeline queue */
@@ -184,14 +182,14 @@ class Redis
             case '-':
                 throw new RedisException(trim(substr($reply, 4)));
                 break;
-            /* Inline reply */
+                /* Inline reply */
             case '+':
                 $response = substr(trim($reply), 1);
                 if ($response === 'OK') {
                     $response = true;
                 }
                 break;
-            /* Bulk reply */
+                /* Bulk reply */
             case '$':
                 $response = null;
                 if ($reply == '$-1') {
@@ -213,7 +211,7 @@ class Redis
                 }
                 fread($this->__sock, 2); /* discard crlf */
                 break;
-            /* Multi-bulk reply */
+                /* Multi-bulk reply */
             case '*':
                 $count = intval(substr($reply, 1));
                 if ($count == '-1') {
@@ -224,7 +222,7 @@ class Redis
                     $response[] = $this->readResponse();
                 }
                 break;
-            /* Integer reply */
+                /* Integer reply */
             case ':':
                 $response = intval(substr(trim($reply), 1));
                 break;
