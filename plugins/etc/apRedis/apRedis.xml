@@ -3,13 +3,13 @@
 
 <plugin>
     <name>apRedis</name>
-    <creationDate>2015-02-23</creationDate>
+    <creationDate>2024-07-04</creationDate>
     <author>Matteo Beccati</author>
     <authorEmail>matteo@beccati.com</authorEmail>
     <authorUrl>http://www.beccati.com/</authorUrl>
     <license>GPLv2</license>
     <description>Redis based Cache Store plugins for OpenX</description>
-    <version>1.3.3</version>
+    <version>1.4.0</version>
     <oxversion>2.8.0</oxversion>
     <extends>deliveryCacheStore</extends>
 
