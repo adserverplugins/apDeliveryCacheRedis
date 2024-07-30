@@ -12,7 +12,7 @@
 
 require_once LIB_PATH . '/Extension/deliveryCacheStore/DeliveryCacheStore.php';
 // Using multi-dirname so tests can be run from either plugins or plugins_repo
-require_once dirname(__FILE__) . '/apRedis.delivery.php';
+require_once __DIR__ . '/apRedis.delivery.php';
 
 
 class Plugins_DeliveryCacheStore_apRedis_apRedis extends Plugins_DeliveryCacheStore
