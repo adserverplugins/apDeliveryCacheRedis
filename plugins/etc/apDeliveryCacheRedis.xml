@@ -4,7 +4,7 @@
 <plugin>
     <name>apDeliveryCacheRedis</name>
     <displayName>AdserverPlugins.com Redis Delivery Cache</displayName>
-    <creationDate>2024-07-04</creationDate>
+    <creationDate>2024-10-22</creationDate>
     <author>AdserverPlugins.com</author>
     <authorEmail>info@adserverplugins.com</authorEmail>
     <authorUrl>http://www.adserverplugins.com/</authorUrl>
@@ -14,6 +14,10 @@
     <type>package</type>
 
     <install>
+
+        <files>
+            <file path="{PLUGINPATH}">apDeliveryCacheRedis.readme.txt</file>
+        </files>
 
         <contents>
             <group name="apRedis">1</group>

@@ -1,0 +1,16 @@
+
+Change Log
+==========
+
+v1.4.0
+    * PHP8+ compatibility fixes.
+
+v1.3.3
+    * Set socket path setting to not required.
+
+v1.3.2
+    * Fixed issue with persistent connections saving data to the wrong
+      database.
+
+v1.3.1
+    * Added socket support.

@@ -3,7 +3,7 @@
 
 <plugin>
     <name>apRedis</name>
-    <creationDate>2024-07-04</creationDate>
+    <creationDate>2024-10-22</creationDate>
     <author>Matteo Beccati</author>
     <authorEmail>matteo@beccati.com</authorEmail>
     <authorUrl>http://www.beccati.com/</authorUrl>
