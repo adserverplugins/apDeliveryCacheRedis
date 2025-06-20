@@ -9,8 +9,6 @@ on:
   push:
     branches:
       - '**'
-    tags-ignore:
-      - '**'
   schedule:
     - cron: '30 10 * * 1,3,5'
 
@@ -43,20 +41,9 @@ jobs:
           - redis-ext
           - no-redis-ext
 
-        revive-branch:
-          - v5.5.x
-          - master
-
-        exclude:
+        include:
+          - revive-branch: master
           - php-version: "7.3"
-            revive-branch: master
-          - php-version: "8.1"
-            revive-branch: v5.5.x
-          - php-version: "8.2"
-            revive-branch: v5.5.x
-          - php-version: "8.3"
-            revive-branch: v5.5.x
-          - php-version: "8.4"
             revive-branch: v5.5.x
 
     services:
