@@ -70,7 +70,7 @@ jobs:
           - 6379:6379
 
     env:
-      PHP_EXTENSIONS: none, ctype, curl, dom, fileinfo, intl, json, libxml, mbstring, openssl, pgsql, simplexml, tokenizer, xml, xmlwriter, zip, ${{ ( matrix.redis-ext == 'redis-ext' ) && 'redis' || '' }}
+      PHP_EXTENSIONS: none, ctype, curl, dom, fileinfo, iconv, intl, json, libxml, mbstring, openssl, pgsql, simplexml, tokenizer, xml, xmlwriter, zip, ${{ ( matrix.redis-ext == 'redis-ext' ) && 'redis' || '' }}
       PHP_INI_VALUES: memory_limit=-1, assert.exception=1, zend.assertions=1, error_reporting=-1, log_errors_max_len=0, display_errors=On
 
     steps:
